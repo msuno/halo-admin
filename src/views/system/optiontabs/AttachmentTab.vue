@@ -369,6 +369,47 @@
           />
         </a-form-item>
       </div>
+      <div
+        id="minioObsForm"
+        v-show="options.attachment_type === 'MINIO'"
+      >
+        <a-form-item label="绑定域名协议：">
+          <a-select v-model="options.minio_domain_protocol">
+            <a-select-option value="https://">HTTPS</a-select-option>
+            <a-select-option value="http://">HTTP</a-select-option>
+          </a-select>
+        </a-form-item>
+        <a-form-item label="绑定域名：">
+          <a-input
+            v-model="options.minio_domain"
+            placeholder="如不填写，路径根域名将为 Bucket + EndPoint"
+          />
+        </a-form-item>
+        <a-form-item label="Bucket（桶名称）：">
+          <a-input
+            v-model="options.minio_bucket_name"
+            placeholder="桶名称"
+          />
+        </a-form-item>
+        <a-form-item label="Access Key：">
+          <a-input-password
+            v-model="options.minio_access_key"
+            autocomplete="new-password"
+          />
+        </a-form-item>
+        <a-form-item label="Access Secret：">
+          <a-input-password
+            v-model="options.minio_access_secret"
+            autocomplete="new-password"
+          />
+        </a-form-item>
+        <a-form-item label="文件目录：">
+          <a-input
+            v-model="options.minio_source"
+            placeholder="不填写则上传到根目录"
+          />
+        </a-form-item>
+      </div>
       <a-form-item>
         <a-button
           type="primary"

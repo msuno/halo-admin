@@ -68,6 +68,8 @@ attachmentApi.upload = (formData, uploadProgress, cancelToken, filed, file, ossT
     return attachmentApi.ossQinUpload(formData, uploadProgress, cancelToken, file)
   } else if (ossType === attachmentApi.type.TENCENTCOS.type) {
     return attachmentApi.ossTenUpload(uploadProgress, cancelToken, file)
+  } else if (ossType === attachmentApi.type.MINIO.type) {
+    return attachmentApi.ossMinioUpload(uploadProgress, cancelToken, file)
   } else {
     return service({
       url: `${baseUrl}/upload`,
@@ -112,6 +114,69 @@ attachmentApi.ossQinUpload = async(formData, uploadProgress, cancelToken, file) 
   })
   result.data.suffix = result.data.suffix ? result.data.suffix.replace('.', '') : result.data.suffix
   return attachmentApi.saveUpload(result.data)
+}
+
+attachmentApi.ossMinioUpload = async(uploadProgress, cancelToken, file) => {
+  const data = await service({
+    url: `${baseUrl}/token`,
+    method: 'post'
+  })
+  const fileName = file.name
+  const basePath = data.data.data.basePath
+  const host = data.data.data.host
+  const formData = new FormData()
+  const key = basePath + fileName
+  formData.append('key', key)
+  formData.append('policy', data.data.data['policy'])
+  formData.append('x-amz-algorithm', data.data.data['x-amz-algorithm'])
+  formData.append('x-amz-credential', data.data.data['x-amz-credential'])
+  formData.append('x-amz-date', data.data.data['x-amz-date'])
+  formData.append('x-amz-signature', data.data.data['x-amz-signature'])
+  formData.append('file', file)
+  const ajax = axios.create()
+  const result = await ajax({
+    url: host,
+    data: formData,
+    method: 'post',
+    onUploadProgress: uploadProgress,
+    cancelToken: cancelToken,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+  const index = fileName.lastIndexOf('.')
+  let suffix = 'png'
+  if (index > 0) {
+    suffix = fileName.substr(index + 1)
+  }
+  let filePath
+  if (host.endsWith('/')) {
+    filePath = host + key
+  } else {
+    filePath = host + '/' + key
+  }
+  let thumbPath
+  if (file.type.indexOf('image') > 0) {
+    thumbPath = filePath
+  } else {
+    thumbPath = ''
+  }
+  if (result.status === 204) {
+    const attachment = {
+      filename: fileName,
+      filePath: filePath,
+      key: key,
+      thumbPath: thumbPath,
+      suffix: suffix,
+      mediaType: file.type,
+      size: file.size,
+      width: 0,
+      height: 0
+    }
+    return attachmentApi.saveUpload(attachment)
+  } else {
+    return new Promise(result.data)
+  }
 }
 
 attachmentApi.ossTenUpload = async(uploadProgress, cancelToken, file) => {
@@ -215,6 +280,10 @@ attachmentApi.type = {
   HUAWEIOBS: {
     type: 'HUAWEIOBS',
     text: '华为云'
+  },
+  MINIO: {
+    type: 'MINIO',
+    text: 'MINIO'
   }
 }
 
