@@ -310,8 +310,9 @@ export default {
           this.handlePreviewVisible(false, true, false)
 
           // 去除视频地址后面的参数
-          var lastIndex = attachment.path.lastIndexOf('?')
-          var path = attachment.path.substring(0, lastIndex)
+          // var lastIndex = attachment.path.lastIndexOf('?')
+          // var path = attachment.path.substring(0, lastIndex)
+          const path = attachment.path
 
           // 设置视频地址
           this.$set(this.videoOptions.video, 'url', path)

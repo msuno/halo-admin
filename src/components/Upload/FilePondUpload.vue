@@ -75,6 +75,11 @@ export default {
       type: Boolean,
       required: false,
       default: true
+    },
+    ossType: {
+      type: String,
+      required: false,
+      default: ''
     }
   },
   computed: {
@@ -117,7 +122,8 @@ export default {
             },
             source.token,
             this.filed,
-            file
+            file,
+            this.ossType
           )
             .then((response) => {
               load(response)

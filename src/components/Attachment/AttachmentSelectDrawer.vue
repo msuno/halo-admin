@@ -35,12 +35,18 @@
               :key="index"
               @click="handleSelectAttachment(item)"
             >
-              <span v-show="!handleJudgeMediaType(item)">当前格式不支持预览</span>
+              <span v-show="!handleJudgeMediaType(item,'image','video')">当前格式不支持预览</span>
               <img
                 :src="item.thumbPath"
-                v-show="handleJudgeMediaType(item)"
+                v-show="handleJudgeMediaType(item,'image')"
                 loading="lazy"
-              >
+              />
+              <video
+                class="video-display"
+                :src="item.path"
+                controls="controls"
+                v-show="handleJudgeMediaType(item,'video')"
+              />
             </div>
           </a-spin>
         </a-col>
@@ -183,19 +189,18 @@ export default {
         this.handleListAttachments()
       }
     },
-    handleJudgeMediaType(attachment) {
+    handleJudgeMediaType(attachment, ...type) {
       var mediaType = attachment.mediaType
       // 判断文件类型
       if (mediaType) {
         var prefix = mediaType.split('/')[0]
-
-        if (prefix === 'image') {
-          // 是图片
-          return true
-        } else {
-          // 非图片
-          return false
+        for (const a of type) {
+          if (prefix === a) {
+            // 是图片
+            return true
+          }
         }
+        return false
       }
       // 没有获取到文件返回false
       return false
